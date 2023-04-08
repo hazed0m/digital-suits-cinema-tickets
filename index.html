@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- Font initialising -->
+    <style>
+        @font-face {
+            font-family: F37 Ginger;
+            src: url('assets/fonts/F37_Ginger_Regular.ttf') format('truetype');
+        }
+    </style>
+    <link rel="stylesheet" href="assets/styles/base.css">
+    <link rel="stylesheet" href="assets/styles/styles.css">
+    <title>Cinema "In da club"</title>
+</head>
+<body>
+    <header class="header">
+        <div class="tickets">
+            <div class="tickets__title">Tickets</div>
+            <div class="tickets__wrapper"></div>
+        </div>
+        <div class="header__logo-wrapper">
+            <div class="header__logo-image">
+                <picture>
+                    <img class="header__logo-img img" src="assets/images/logo-no-background.png" alt="Cinema 'In da club'" loading="lazy" decoding="async">
+                </picture>
+            </div>
+        </div>
+    </header>
+    <div class="register">
+        <div class="register__wrapper">
+            <form class="register__form">
+                <input type="text" id="name" class="register__name" placeholder="Your Name">
+                <button class="register__submit" id="registerSubmit">Go On</button>
+            </form>
+        </div>
+    </div>
+    <div class="container">
+        <div class="movies__wrapper"></div>
+    </div>
+    <script src="assets/scripts/jquery.slim.min.js" defer></script>
+    <script src="assets/scripts/scripts.js" defer></script>
+</body>
+</html>
