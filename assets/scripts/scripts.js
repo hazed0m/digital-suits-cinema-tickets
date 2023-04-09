@@ -111,14 +111,12 @@ function generateDaySession() {
     return schemas.daySessionSchema;
 }
 function generatePlayingHours(hoursList, movieId, hallName) {
-    const seatIcon = `<div class="session__seat-icon"></div>`;
     let seatTemplate = ``;
     let hoursTemplate = ``;
     let timeWrapper = ``;
     let currentTime = 0;
     let iterator = 0;
-    const currentHour = globalDate.getHours();
-
+    let currentHour = globalDate.getHours() > 20 ? 10 : globalDate.getHours();
     for (const [time, seats] of Object.entries(hoursList)) {
         //check to remove finished or started sessions
         if(time >= currentHour) {
@@ -132,7 +130,7 @@ function generatePlayingHours(hoursList, movieId, hallName) {
             for (const [title, seat] of Object.entries(seats)) {
                 seatTemplate += `
                     <div seat-status="${seat}" hall-name="${hallName}" movie-id="${movieId}" seat-position="${title}" seat-position="${title}" class="session__seat${seat != false ? ` ${modifiers.gone}` : ''}">
-                        ${seatIcon}
+                        <div class="session__seat-icon"></div>
                     </div>
                 `;
             }
@@ -163,7 +161,7 @@ function generateMovieItem(sessions) {
                 const movieItem = hallMoviesList[movieItemKey];
                 movieTemplate += `
                 <div class="movies__item border-shadow">
-                    <div class="movies__image-wrapper border-shadow" style="background-image: url('assets/images/${movieItem.movieCover}')"></div>
+                    <div class="movies__image-wrapper border-shadow" style="background-image: url(/assets/images/${movieItem.movieCover})"></div>
                     <div class="movies__title-wrapper">
                         <div class="movies__title">${movieItem.movieTitle}</div>
                         <div class="movies__genre">${movieItem.movieGenre}</div>
