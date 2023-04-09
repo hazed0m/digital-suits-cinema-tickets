@@ -1,4 +1,3 @@
-
 //https://github.com/hazed0m/digital-suits-cinema-tickets.git
 
 // Реализовать одностраничное приложение резервирования билетов в кинотеатр.
@@ -87,7 +86,7 @@ const data = {
 const globalDate = new Date();
 
 function generateMonthSession() {
-    const weekDayCount = 7; // only 7 days from current date
+    const weekDayCount = 7; // only 7 days from current date by task or can use lastDate variable to make month schedule
     const currentDate = globalDate.getDate();
     const currentMonth = globalDate.getMonth();
     const currentMonthName = schemas.monthsList[currentMonth];
@@ -95,6 +94,7 @@ function generateMonthSession() {
     const availableSessionsList = {};
     const daySessionSchema = generateDaySession();
 
+    //Generate Month using weekDayCount
     if(currentDate + weekDayCount <= lastDate) {
         availableSessionsList[currentMonthName] = {};
 
@@ -111,7 +111,7 @@ function generateDaySession() {
     return schemas.daySessionSchema;
 }
 function generatePlayingHours(hoursList, movieId, hallName) {
-    const seatIcon = ``;
+    const seatIcon = `<div class="session__seat-icon"></div>`;
     let seatTemplate = ``;
     let hoursTemplate = ``;
     let timeWrapper = ``;
@@ -163,11 +163,7 @@ function generateMovieItem(sessions) {
                 const movieItem = hallMoviesList[movieItemKey];
                 movieTemplate += `
                 <div class="movies__item border-shadow">
-                    <div class="movies__image-wrapper border-shadow">
-                        <picture>
-                            <img class="movies__image img" src="assets/images/${movieItem.movieCover}" alt="${movieItem.movieTitle}" loading="lazy" decoding="async">
-                        </picture>
-                    </div>
+                    <div class="movies__image-wrapper border-shadow" style="background-image: url('assets/images/${movieItem.movieCover}')"></div>
                     <div class="movies__title-wrapper">
                         <div class="movies__title">${movieItem.movieTitle}</div>
                         <div class="movies__genre">${movieItem.movieGenre}</div>
@@ -180,14 +176,15 @@ function generateMovieItem(sessions) {
         return movieTemplate;
     }
 }
+function onlyLettersAndSpaces(str) {
+    return Boolean(str?.match(/^[A-Za-z\s]*$/));
+}
 function setLocalStorage(localStorageData) {
     if(localStorageData != undefined) {
         localStorage.setItem(selectors.localStorage, JSON.stringify(localStorageData));
     } else {
         if(localStorage.getItem(selectors.localStorage) === null) {
             localStorage.setItem(selectors.localStorage, JSON.stringify(data.monthSession));
-        } else {
-            const localStorageObject = JSON.parse(localStorage.getItem(selectors.localStorage));
         }
     }
 }
@@ -225,7 +222,7 @@ function eventsLoader() {
         }
     });
     seatsWrapper.on('click', function(e) {
-        const clickTarget = $(e.target);
+        const clickTarget = $(e.target).closest(selectors.seatItem);
         if(!clickTarget.hasClass(modifiers.gone)) {
             const moviesItemWrapper = clickTarget.closest(selectors.moviesItemWrapper);
             const seatsWrapper = clickTarget.closest(selectors.seatsWrapper);
@@ -265,23 +262,34 @@ function eventsLoader() {
         const container = $(selectors.container);
         const registerInput = registerForm.find('#name');
         const name = registerInput.val();
-        localStorage.setItem('name', name);
-        data.userName = name;
-        container.addClass(modifiers.active);
-        register.addClass(modifiers.done);
-        registerForm.find('#name').val();
-    });
-    ticketsTitle.on('click', function() {
-        if(!ticketsWrapper.hasClass(modifiers.active)) {
-            ticketsWrapper.addClass(modifiers.active);
+        if(onlyLettersAndSpaces(name) === true) {
+            localStorage.setItem('name', name);
+            data.userName = name;
+            container.addClass(modifiers.active);
+            register.addClass(modifiers.done);
+            registerInput.val('');
         } else {
-            ticketsWrapper.removeClass(modifiers.active);
+            registerInput.val('');
+            registerInput.css({
+                'border-color': '#d82727'
+            });
+            registerInput.attr('placeholder', 'Only letters and spaces');
         }
     });
-    ticketsWrapper.on('mouseleave', showTicketsWrapper);
-    container.on('mouseover', showTicketsWrapper);
+    ticketsTitle.on('click', toggleTicketsWrapper);
+    ticketsWrapper.on('click', toggleTicketsWrapper);
+    ticketsWrapper.on('mouseleave', hideTicketsWrapper);
+    container.on('mouseover', hideTicketsWrapper);
 }
-function showTicketsWrapper() {
+function toggleTicketsWrapper() {
+    const ticketsWrapper = $(selectors.ticketsWrapper);
+    if (!ticketsWrapper.hasClass(modifiers.active)) {
+        ticketsWrapper.addClass(modifiers.active);
+    } else {
+        ticketsWrapper.removeClass(modifiers.active);
+    }
+}
+function hideTicketsWrapper() {
     const ticketsWrapper = $(selectors.ticketsWrapper);
     ticketsWrapper.removeClass(modifiers.active);
 }
