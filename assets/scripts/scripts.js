@@ -86,7 +86,7 @@ const data = {
 const globalDate = new Date();
 
 function generateMonthSession() {
-    const weekDayCount = 7; // only 7 days from current date by task or can use lastDate variable to make month schedule
+    const weekDayCount = 7; //  7 days from current date by task or can use lastDate variable to make month schedule
     const currentDate = globalDate.getDate();
     const currentMonth = globalDate.getMonth();
     const currentMonthName = schemas.monthsList[currentMonth];
@@ -110,47 +110,67 @@ function generateDaySession() {
     });
     return schemas.daySessionSchema;
 }
-function generatePlayingHours(hoursList, movieId, hallName) {
+function generateSeats(time, seats, movieId, hallName, iterator) {
     let seatTemplate = ``;
-    let hoursTemplate = ``;
     let timeWrapper = ``;
-    let currentTime = 0;
+    //Render time-wrapper
+    timeWrapper += `<div data-time="${time}" class="movies__time${iterator == 0 ? ' active' : ''}">${time}:00</div>`;
+    //Start session__seats-wrapper
+    seatTemplate += `<div data-time="${time}" class="session__seats-wrapper${iterator == 0 ? ' active' : ''} border-shadow">`;
+    //Seats till next hour
+    for (const [title, seat] of Object.entries(seats)) {
+        seatTemplate += `<div seat-status="${seat}" hall-name="${hallName}" movie-id="${movieId}" seat-position="${title}" seat-position="${title}" class="session__seat${seat != false ? ` ${modifiers.gone}` : ''}">
+                <div class="session__seat-icon"></div>
+            </div>
+        `;
+    }
+    //End session__seats-wrapper
+    seatTemplate += `<div class="session__seat-time">${time}:00</div>`;
+    seatTemplate += `</div>`;
+    return {
+        timeWrapper: timeWrapper,
+        seatTemplate: seatTemplate
+    };
+}
+function generatePlayingHours(hoursList, movieId, hallName, sessionDay) {
+    let commonTemplate = ``;
+    let seatTemplate = ``;
+    let timeWrapper = ``;
+    let hoursTemplate = ``;
     let iterator = 0;
-    let currentHour = globalDate.getHours() > 20 ? 10 : globalDate.getHours();
+
+    const currentDate = globalDate.getDate();
+    const currentHour = globalDate.getHours();
+
     for (const [time, seats] of Object.entries(hoursList)) {
         //check to remove finished or started sessions
-        if(time >= currentHour) {
-            //Render time-wrapper
-            timeWrapper += `
-                <div data-time="${time}" class="movies__time${iterator == 0 ? ' active' : ''}">${time}:00</div>
-            `;
-            //Start session__seats-wrapper
-            seatTemplate += `<div data-time="${time}" class="session__seats-wrapper${iterator == 0 ? ' active' : ''} border-shadow">`;
-            //Seats till next hour
-            for (const [title, seat] of Object.entries(seats)) {
-                seatTemplate += `
-                    <div seat-status="${seat}" hall-name="${hallName}" movie-id="${movieId}" seat-position="${title}" seat-position="${title}" class="session__seat${seat != false ? ` ${modifiers.gone}` : ''}">
-                        <div class="session__seat-icon"></div>
-                    </div>
-                `;
+        if(currentDate == sessionDay) {
+            if(currentHour <= time) {
+                commonTemplate = generateSeats(time, seats, movieId, hallName, iterator);
+            } else {
+                continue;
             }
-            //End session__seats-wrapper
-            seatTemplate += `<div class="session__seat-time">${time}:00</div>`;
-            seatTemplate += `</div>`;
-            hoursTemplate = `
-                <div class="movies__time-wrapper">
-                    ${timeWrapper}
-                </div>
-                <div class="movies__session">
-                    ${seatTemplate}
-                </div>
-            `;
-            iterator++;
+        } else {
+            commonTemplate = generateSeats(time, seats, movieId, hallName, iterator);
         }
+        timeWrapper += commonTemplate.timeWrapper;
+        seatTemplate += commonTemplate.seatTemplate;
+        iterator++;
+    }
+    hoursTemplate = `
+            <div class="movies__time-wrapper">
+                ${timeWrapper}
+            </div>
+            <div class="movies__session">
+                ${seatTemplate}
+            </div>
+        `;
+    if(timeWrapper === '' || seatTemplate === '') {
+        hoursTemplate = '';
     }
     return hoursTemplate;
 }
-function generateMovieItem(sessions) {
+function generateMovieItem(sessions, sessionDate) {
     if(sessions != undefined) {
         let movieTemplate = ``;
         for (const hall in sessions) {
@@ -159,22 +179,26 @@ function generateMovieItem(sessions) {
             movieTemplate += hallWrapper;
             for (const movieItemKey in hallMoviesList) {
                 const movieItem = hallMoviesList[movieItemKey];
-                movieTemplate += `
-                <div class="movies__item border-shadow">
-                    <div class="movies__image-wrapper border-shadow" style="background-image: url(/assets/images/${movieItem.movieCover})"></div>
-                    <div class="movies__title-wrapper">
-                        <div class="movies__title">${movieItem.movieTitle}</div>
-                        <div class="movies__genre">${movieItem.movieGenre}</div>
-                    </div>
-                    ${generatePlayingHours(movieItem.playingHours, movieItem.movieId, hall)}
-                </div>
-            `;
+                const playingTimeTemplate = generatePlayingHours(movieItem.playingHours, movieItem.movieId, hall, parseInt(sessionDate));
+                if(playingTimeTemplate != '') {
+                    movieTemplate += `
+                        <div class="movies__item border-shadow">
+                            <div class="movies__image-wrapper border-shadow" style="background-image: url(/assets/images/${movieItem.movieCover})"></div>
+                            <div class="movies__title-wrapper">
+                                <div class="movies__title">${movieItem.movieTitle}</div>
+                                <div class="movies__genre">${movieItem.movieGenre}</div>
+                            </div>
+                            ${playingTimeTemplate}
+                        </div>
+                        }
+                    `;
+                }
             };
         }
         return movieTemplate;
     }
 }
-function onlyLettersAndSpaces(str) {
+function LettersAndSpaces(str) {
     return Boolean(str?.match(/^[A-Za-z\s]*$/));
 }
 function setLocalStorage(localStorageData) {
@@ -260,7 +284,7 @@ function eventsLoader() {
         const container = $(selectors.container);
         const registerInput = registerForm.find('#name');
         const name = registerInput.val();
-        if(onlyLettersAndSpaces(name) === true) {
+        if(LettersAndSpaces(name) === true && name != '') {
             localStorage.setItem('name', name);
             data.userName = name;
             container.addClass(modifiers.active);
@@ -333,6 +357,8 @@ function getName() {
 function render() {
     const moviesContainer = $(selectors.moviesWrapper);
     const localStorageData = getLocalStorage();
+    const currentDate = globalDate.getDate();
+    const currentHour = globalDate.getHours();
     let currentData = null;
     let months = null;
 
@@ -351,18 +377,20 @@ function render() {
 
         //Render each month
         $(months).each(function (index, month) {
-            for (const innerKey in currentData[month]) {
-                const innerItem = currentData[month][innerKey];
+            for (const sessionDate in currentData[month]) {
+                const session = currentData[month][sessionDate];
                 const dayWrapper = `<div class="movies__day-wrapper">
-                                            <div class="movies__day-title border-bottom">${innerKey} ${month}</div>
+                                            <div class="movies__day-title border-bottom">${sessionDate} ${month}</div>
                                         </div>`;
-                const generateMovieTemplate = generateMovieItem(innerItem);
+                const generateMovieTemplate = generateMovieItem(session, sessionDate);
                 if (generateMovieTemplate != '') {
-                    const template = `<div class="movies__item-wrapper" data-date="${innerKey}" data-month="${month}">
+                    const template = `<div class="movies__item-wrapper" data-date="${sessionDate}" data-month="${month}">
                                         ${dayWrapper}
                                         ${generateMovieTemplate}
                                     </div>`;
-                    moviesContainer.append(template);
+                    if(currentHour <= 20 && currentDate <= sessionDate) {
+                        moviesContainer.append(template);
+                    }
                 }
             }
         });
