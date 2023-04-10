@@ -14,6 +14,7 @@ const selectors = {
     'sessionWrapper': ".movies__session",
     'seatsWrapper': '.session__seats-wrapper',
     'seatItem': '.session__seat',
+    'seatTime': '.session__seat-time',
     'timeWrapper': '.movies__time-wrapper',
     'moviesWrapper': '.movies__wrapper',
     'moviesItemWrapper': '.movies__item-wrapper',
@@ -244,7 +245,7 @@ function eventsLoader() {
     });
     seatsWrapper.on('click', function(e) {
         const clickTarget = $(e.target).closest(selectors.seatItem);
-        if(!clickTarget.hasClass(modifiers.gone)) {
+        if(!clickTarget.hasClass(modifiers.gone) && clickTarget.length > 0) {
             const moviesItemWrapper = clickTarget.closest(selectors.moviesItemWrapper);
             const seatsWrapper = clickTarget.closest(selectors.seatsWrapper);
             const time = seatsWrapper.attr('data-time');
