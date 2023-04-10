@@ -190,7 +190,6 @@ function generateMovieItem(sessions, sessionDate) {
                             </div>
                             ${playingTimeTemplate}
                         </div>
-                        }
                     `;
                 }
             };
@@ -380,8 +379,8 @@ function render() {
             for (const sessionDate in currentData[month]) {
                 const session = currentData[month][sessionDate];
                 const dayWrapper = `<div class="movies__day-wrapper">
-                                            <div class="movies__day-title border-bottom">${sessionDate} ${month}</div>
-                                        </div>`;
+                                        <div class="movies__day-title border-bottom">${sessionDate} ${month}</div>
+                                    </div>`;
                 const generateMovieTemplate = generateMovieItem(session, sessionDate);
                 if (generateMovieTemplate != '') {
                     const template = `<div class="movies__item-wrapper" data-date="${sessionDate}" data-month="${month}">
