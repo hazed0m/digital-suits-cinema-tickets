@@ -346,8 +346,8 @@ function getName() {
     const register = $(selectors.register);
     const container = $(selectors.container);
     const nameLocalStorage = localStorage.getItem('name');
-
     if(nameLocalStorage != undefined) {
+        register.addClass(modifiers.active);
         data.userName = nameLocalStorage;
         register.addClass(modifiers.done);
         container.addClass(modifiers.active);
