@@ -387,7 +387,11 @@ function render() {
                                         ${dayWrapper}
                                         ${generateMovieTemplate}
                                     </div>`;
-                    if(currentHour <= 20 && currentDate <= sessionDate) {
+                    if(currentDate == sessionDate) {
+                        if(currentHour <= 20) {
+                            moviesContainer.append(template);
+                        }
+                    } else if(currentDate < sessionDate) {
                         moviesContainer.append(template);
                     }
                 }
