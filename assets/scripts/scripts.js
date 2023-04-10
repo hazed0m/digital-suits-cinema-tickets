@@ -347,10 +347,11 @@ function getName() {
     const container = $(selectors.container);
     const nameLocalStorage = localStorage.getItem('name');
     if(nameLocalStorage != undefined) {
-        register.addClass(modifiers.active);
         data.userName = nameLocalStorage;
         register.addClass(modifiers.done);
         container.addClass(modifiers.active);
+    } else {
+        register.addClass(modifiers.active);
     }
 }
 function render() {
